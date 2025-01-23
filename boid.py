@@ -130,16 +130,50 @@ class Boid:
 		self.velocity.limit(self.max_speed)
 		self.angle = self.velocity.heading() + pi/2
 
+
+	#triangle 
+	# def Draw(self, screen, distance, scale):
+	# 	ps = []
+	# 	points = [None for _ in range(3)]
+
+	# 	points[0] = [[0],[-self.size],[0]]
+	# 	points[1] = [[self.size//2],[self.size//2],[0]]
+	# 	points[2] = [[-self.size//2],[self.size//2],[0]]
+
+	# 	for point in points:
+	# 		rotated = matrix_multiplication(rotationZ(self.angle) , point)
+	# 		z = 1/(distance - rotated[2][0])
+
+	# 		projection_matrix = [[z, 0, 0], [0, z, 0]]
+	# 		projected_2d = matrix_multiplication(projection_matrix, rotated)
+
+	# 		x = int(projected_2d[0][0] * scale) + self.position.x
+	# 		y = int(projected_2d[1][0] * scale) + self.position.y
+	# 		ps.append((x, y))
+
+	# 	pygame.draw.polygon(screen, self.secondaryColor, ps)
+	# 	pygame.draw.polygon(screen, self.color, ps, self.stroke)
+  
+  
+	
+ 
+	#rectangle 
 	def Draw(self, screen, distance, scale):
 		ps = []
-		points = [None for _ in range(3)]
+		# Change to 4 points for rectangle
+		points = [None for _ in range(4)]
 
-		points[0] = [[0],[-self.size],[0]]
-		points[1] = [[self.size//2],[self.size//2],[0]]
-		points[2] = [[-self.size//2],[self.size//2],[0]]
+		# Define rectangle points
+		half_width = self.size//2
+		half_height = self.size//2
+		half_height = 2*half_height
+		points[0] = [[-half_width],[-half_height],[0]]  # Top left
+		points[1] = [[half_width],[-half_height],[0]]   # Top right
+		points[2] = [[half_width],[half_height],[0]]    # Bottom right
+		points[3] = [[-half_width],[half_height],[0]]   # Bottom left
 
 		for point in points:
-			rotated = matrix_multiplication(rotationZ(self.angle) , point)
+			rotated = matrix_multiplication(rotationZ(self.angle), point)
 			z = 1/(distance - rotated[2][0])
 
 			projection_matrix = [[z, 0, 0], [0, z, 0]]
