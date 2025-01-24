@@ -60,6 +60,7 @@ class Vector:
 			self.y = self.y/sqrt(squared_mag)
 			self.x = self.x * max_length
 			self.y = self.y * max_length
+   
 	def reset(self, x=0, y=0):
 		self.x = x
 		self.y = y

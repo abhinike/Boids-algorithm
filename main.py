@@ -23,8 +23,10 @@ speed = 0.0005
 
 flock = []
 #number of boids
-n = 50
+n = 20
 #radius of perception of each boid
+
+
 
 for i in range(n):
 	flock.append(Boid(random.randint(20, Width-20), random.randint(20, Height-20)))
@@ -43,6 +45,10 @@ run = True
 while run:
 	clock.tick(fps)
 	window.fill((10, 10, 15))
+ 
+	#render highway
+	highway.render(screen=window)
+	
 
 	n = numberInput.value
 	scale = sliderScale.value
@@ -75,12 +81,12 @@ while run:
 			flock.append(Boid(random.randint(20, Width-20), random.randint(20, Height-20)))
 		reset = False
 
-
+	
 	for boid in flock:
 		boid.toggles = {"separation": toggleSeparation.state, "alignment": toggleAlignment.state,"cohesion": toggleCohesion.state}
 		boid.values = {"separation": separationInput.value/100, "alignment": alignmentInput.value/100,"cohesion": cohesionInput.value/100}
 		boid.radius = scale
-		boid.limits(Width, Height)
+		boid.limits(Width, Height, 400 )
 		boid.behaviour(flock)
 		boid.update()
 		boid.hue += speed
@@ -90,6 +96,7 @@ while run:
 
 	if showUI == True:
 		panel.Render(window)
+
 		resetButton.Render(window)
 		Behaviours.Render(window)
 		Separation.Render(window)
@@ -109,6 +116,7 @@ while run:
 		numberInput.Render(window, textI, backSpace, keyPressed)
 
 		sliderScale.Render(window)
+
 	else:
 		UItoggle.Render(window)
 	backSpace = False

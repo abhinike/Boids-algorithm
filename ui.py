@@ -59,6 +59,35 @@ class Panel:
         s.fill(self.color)
         screen.blit(s, (self.position[0], self.position[1]))
         # pygame.draw.rect(screen, self.color, pygame.Rect(self.position[0], self.position[1], self.w, self.h))
+        
+class Highway:
+    def __init__(self, screen_width, lanes=4, lane_width=100, dash_length=20, dash_gap=20):
+        self.width = 400
+        self.length = screen_width
+        self.lanes = lanes
+        self.lane_width = lane_width
+        self.dash_length = dash_length
+        self.dash_gap = dash_gap
+
+    def draw_dashed_line(self, screen, color, start_pos, end_pos, width=1):
+        x1, y1 = start_pos
+        x2, y2 = end_pos
+        dl = self.dash_length
+        dg = self.dash_gap
+        if x1 == x2:  # Vertical dashed line
+            for y in range(y1, y2, dl + dg):
+                pygame.draw.line(screen, color, (x1, y), (x1, min(y + dl, y2)), width)
+        elif y1 == y2:  # Horizontal dashed line
+            for x in range(x1, x2, dl + dg):
+                pygame.draw.line(screen, color, (x, y1), (min(x + dl, x2), y1), width)
+
+    def render(self, screen):
+        highway_rect = pygame.Rect(0, (screen.get_height() - self.width) // 2, self.length, self.width)
+        pygame.draw.rect(screen, (50, 50, 50), highway_rect)
+
+        for i in range(1, self.lanes):
+            lane_y = highway_rect.top + i * self.lane_width
+            self.draw_dashed_line(screen, (255, 255, 255), (0, lane_y), (self.length, lane_y), 2)
 
 class ToggleButton:
     def __init__(self, position= ((Width-200, 400)), w = 30, h=30, state=False, color=(40, 40, 10), activeColor=(240, 140, 60)):
