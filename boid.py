@@ -4,6 +4,7 @@ from random import uniform
 import colorsys
 from matrix import *
 from math import pi, sin, cos
+from constants import * 
 
 # def hsvToRGB(h, s, v):
 #     return tuple(round(i * 255) for i in colorsys.hsv_to_rgb(h, s, v))
@@ -11,8 +12,8 @@ from math import pi, sin, cos
 class Boid:
     def __init__(self, x, y):
         self.position = Vector(x, y)
-        vec_x = uniform(-1, 1)
-        vec_y = uniform(-1, 1)
+        vec_x = uniform(0.5, 1)
+        vec_y = uniform(-0.5, 0.5)
         self.velocity = Vector(vec_x, vec_y)
         self.velocity.normalize()
         # Set a random magnitude
@@ -76,6 +77,16 @@ class Boid:
                 temp = temp / (dist ** 2)
                 steering.add(temp)
                 total += 1
+        
+        # Avoid edges of the highway
+        if self.position.y - self.radius < HighwayTop:
+            edge_steering = Vector(0, 1)
+            steering.add(edge_steering)
+            total += 1
+        elif self.position.y + self.radius > HighwayBottom:
+            edge_steering = Vector(0, -1)
+            steering.add(edge_steering)
+            total += 1
 
         if total > 0:
             steering = steering / total
@@ -128,6 +139,10 @@ class Boid:
         return steering
 
     def update(self):
+        
+        # Increase the horizontal component
+        self.velocity.x = abs(self.velocity.x) * 1.5  # Ensure positive horizontal direction
+        self.velocity.normalize()
         self.position = self.position + self.velocity
         self.velocity = self.velocity + self.acceleration
         self.velocity.limit(self.max_speed)

@@ -6,3 +6,7 @@ size=(Width, Height)
 #Define highway constants 
 Nolanes = 4
 HighwayWidth = 400
+
+
+HighwayTop = (Height - HighwayWidth) // 2
+HighwayBottom = HighwayTop + HighwayWidth

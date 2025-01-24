@@ -28,7 +28,7 @@ toggleCohesion= ToggleButton((Width-160, 250), 20, 20, True)
 separationInput = DigitInput(10, (Width-160, 300), 80, 30)
 alignmentInput = DigitInput(10, (Width-160, 350), 80, 30)
 cohesionInput = DigitInput(10, (Width-160, 400), 80, 30)
-numberInput = DigitInput(100, (Width-160, 450), 80, 30)
+numberInput = DigitInput(15, (Width-160, 450), 80, 30)
 
 sliderScale = Slider(Width-280, 550, 40, 0, 100, 180, 10, 80)
 
