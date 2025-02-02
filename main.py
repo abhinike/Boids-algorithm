@@ -6,6 +6,7 @@ import random
 from matrix import *
 from constants import *
 from uiParameters import *
+from ambulance import AmbulanceBoid
 
 pygame.init()
 window = pygame.display.set_mode((400, 900), pygame.FULLSCREEN)
@@ -26,12 +27,32 @@ flock = []
 n = 20
 #radius of perception of each boid
 
+# Calculate lane positions
+highway_height = 400  # Total height of highway
+lane_height = highway_height / 3  # Height of each lane
+highway_top = (Height - highway_height) // 2  # Starting y position of highway
 
+# Calculate the center y-coordinate for each lane
+lane_1_y = highway_top + (lane_height / 2)  # Top lane center
+lane_2_y = lane_1_y + lane_height          # Middle lane center
+lane_3_y = lane_2_y + lane_height          # Bottom lane center
 
+# Create boids in lanes
 for i in range(n):
-	flock.append(Boid(random.randint(20, Width-20), random.randint(20, Height-20)))
+    # Randomly select a lane
+    lane_y = random.choice([lane_1_y, lane_2_y, lane_3_y])
+    
+    # Add small random variation within the lane (optional)
+    lane_variation = random.randint(-10, 10)  # ±10 pixels variation
+    
+    # Create boid with random x position but fixed lane y position
+    flock.append(Boid(
+        x=random.randint(20, Width-20),
+        y=lane_y + lane_variation
+    ))
  
- 
+ambulance = AmbulanceBoid(random.randint(20, Width - 20), random.randint(20, Height - 20))
+flock.append(ambulance) 
  
 
 textI = "10"
@@ -83,14 +104,27 @@ while run:
 
 	
 	for boid in flock:
-		boid.toggles = {"separation": toggleSeparation.state, "alignment": toggleAlignment.state,"cohesion": toggleCohesion.state}
-		boid.values = {"separation": separationInput.value/100, "alignment": alignmentInput.value/100,"cohesion": cohesionInput.value/100}
+		if isinstance(boid, AmbulanceBoid):
+			boid.activate_siren(flock)  # Activate siren effect for ambulance boid
+
+		# Update boid properties and behavior
+		boid.toggles = {
+			"separation": toggleSeparation.state,
+			"alignment": toggleAlignment.state,
+			"cohesion": toggleCohesion.state
+		}
+		boid.values = {
+			"separation": separationInput.value / 100,
+			"alignment": alignmentInput.value / 100,
+			"cohesion": cohesionInput.value / 100
+		}
 		boid.radius = scale
-		boid.limits(Width, Height, 400 )
+		boid.limits(Width, Height, 400)
 		boid.behaviour(flock)
 		boid.update()
 		boid.hue += speed
 		boid.Draw(window, Distance, scale)
+
 
 
 

@@ -50,21 +50,50 @@ class Boid:
             align = align * self.values["alignment"]
             self.acceleration.add(align)
 
-    def limits(self, screen_width, screen_height, highway_width):
-        highway_top = (screen_height - highway_width) // 2
-        highway_bottom = highway_top + highway_width
+    # def limits(self, screen_width, screen_height, highway_width):
+    #     highway_top = (screen_height - highway_width) // 2
+    #     highway_bottom = highway_top + highway_width
 
-        # Limit x position to screen width
+    #     # Limit x position to screen width
+    #     if self.position.x < 0:
+    #         self.position.x = screen_width
+    #     elif self.position.x > screen_width:
+    #         self.position.x = 0
+
+    #     # Limit y position to highway boundaries
+    #     if self.position.y < highway_top:
+    #         self.position.y = highway_top
+    #     elif self.position.y > highway_bottom:
+    #         self.position.y = highway_bottom
+    
+    
+    def limits(self, screen_width, screen_height, highway_width):
+    # Limit x position to screen width
         if self.position.x < 0:
             self.position.x = screen_width
         elif self.position.x > screen_width:
             self.position.x = 0
-
-        # Limit y position to highway boundaries
-        if self.position.y < highway_top:
-            self.position.y = highway_top
-        elif self.position.y > highway_bottom:
-            self.position.y = highway_bottom
+            
+        # Get current lane
+        lane_height = highway_width / 3
+        highway_top = (screen_height - highway_width) // 2
+        
+        lane_1_y = highway_top + (lane_height / 2)
+        lane_2_y = lane_1_y + lane_height
+        lane_3_y = lane_2_y + lane_height
+        
+        # Find nearest lane center
+        lanes = [lane_1_y, lane_2_y, lane_3_y]
+        current_lane = min(lanes, key=lambda lane: abs(lane - self.position.y))
+        
+        # Keep boid close to lane center
+        max_deviation = 15  # Maximum allowed deviation from lane center
+        if abs(self.position.y - current_lane) > max_deviation:
+            # Gradually move back to lane center
+            if self.position.y > current_lane:
+                self.position.y -= 1
+            else:
+                self.position.y += 1
 
     def separation(self, flockMates):
         total = 0
