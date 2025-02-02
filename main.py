@@ -48,6 +48,7 @@ while run:
  
 	#render highway
 	highway.render(screen=window)
+	highway2.render(screen=window)
 	
 
 	n = numberInput.value
@@ -86,7 +87,7 @@ while run:
 		boid.toggles = {"separation": toggleSeparation.state, "alignment": toggleAlignment.state,"cohesion": toggleCohesion.state}
 		boid.values = {"separation": separationInput.value/100, "alignment": alignmentInput.value/100,"cohesion": cohesionInput.value/100}
 		boid.radius = scale
-		boid.limits(Width, Height, 400 )
+		boid.limits(Width, Height,  highway, highway2 )
 		boid.behaviour(flock)
 		boid.update()
 		boid.hue += speed

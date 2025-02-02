@@ -5,7 +5,8 @@ panel = Panel()
 panel.color = (0, 0, 0)
 resetButton = Button("Reset")
 
-highway = Highway(screen_width=Width)
+highway = Highway()
+highway2 = Highway2(screen_width=Width)
 
 Behaviours = TextUI("BEHAVIOURS", (Width-180, 120), (255, 255, 255))
 UItoggle = TextUI("Press 'U' to show parameter panel", (Width-180, 120), (55, 120, 255))

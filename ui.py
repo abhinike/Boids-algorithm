@@ -1,3 +1,4 @@
+import math
 import pygame
 from constants import *
 from tools import *
@@ -59,15 +60,21 @@ class Panel:
         s.fill(self.color)
         screen.blit(s, (self.position[0], self.position[1]))
         # pygame.draw.rect(screen, self.color, pygame.Rect(self.position[0], self.position[1], self.w, self.h))
-        
+     
+     
 class Highway:
-    def __init__(self, screen_width, lanes=4, lane_width=100, dash_length=20, dash_gap=20):
+    def __init__(self, lanes=4, lane_width=100, dash_length=20, dash_gap=20):
         self.width = 400
-        self.length = screen_width
+        self.length = Width
         self.lanes = lanes
         self.lane_width = lane_width
         self.dash_length = dash_length
         self.dash_gap = dash_gap
+        # highway coordinates
+        self.top_left_coordinate = (0, 0)
+        self.bottom_left_coordinate = (0, 400)
+        self.top_right_coordinate = (Width, 0)
+        self.bottom_right_coordinate = (Width,400)
 
     def draw_dashed_line(self, screen, color, start_pos, end_pos, width=1):
         x1, y1 = start_pos
@@ -82,12 +89,59 @@ class Highway:
                 pygame.draw.line(screen, color, (x, y1), (min(x + dl, x2), y1), width)
 
     def render(self, screen):
-        highway_rect = pygame.Rect(0, (screen.get_height() - self.width) // 2, self.length, self.width)
+        highway_rect = pygame.Rect(self.top_left_coordinate[0], self.top_left_coordinate[1], self.length, self.width)
         pygame.draw.rect(screen, (50, 50, 50), highway_rect)
 
         for i in range(1, self.lanes):
             lane_y = highway_rect.top + i * self.lane_width
             self.draw_dashed_line(screen, (255, 255, 255), (0, lane_y), (self.length, lane_y), 2)
+
+class Highway2:
+    def __init__(self, screen_width, lanes=2, lane_width=100, dash_length=20, dash_gap=20):
+        self.width = 400
+        self.length = screen_width
+        self.lanes = lanes
+        self.lane_width = lane_width
+        self.dash_length = dash_length
+        self.dash_gap = dash_gap
+        # highway2 coordinates
+        self.top_left_coordinate = (500, 400)
+        self.bottom_left_coordinate = (700, 400)
+        self.top_right_coordinate = (0, Height)
+        self.bottom_right_coordinate = (200, Height)
+
+    def draw_dashed_line(self, screen, color, start_pos, end_pos, width=1):
+        x1, y1 = start_pos
+        x2, y2 = end_pos
+        dl = self.dash_length
+        dg = self.dash_gap
+        angle = math.atan2(y2 - y1, x2 - x1)
+        dx = dl * math.cos(angle)
+        dy = dl * math.sin(angle)
+        gap_dx = dg * math.cos(angle)
+        gap_dy = dg * math.sin(angle)
+        while math.hypot(x2 - x1, y2 - y1) > dl:
+            pygame.draw.line(screen, color, (x1, y1), (x1 + dx, y1 + dy), width)
+            x1 += dx + gap_dx
+            y1 += dy + gap_dy
+
+    def render(self, screen):
+        # Define the polygon points for the highway at a 30-degree angle
+        highway_2_polygon = [
+            self.top_left_coordinate,
+            self.bottom_left_coordinate,
+            self.bottom_right_coordinate,
+            self.top_right_coordinate
+        ]
+        pygame.draw.polygon(screen, (50, 50, 50), highway_2_polygon)
+
+        # Draw dashed lines for the lanes
+        for i in range(1, self.lanes):
+            offset = i * self.lane_width
+            start_pos = (self.top_left_coordinate[0] + offset, self.top_left_coordinate[1])
+            end_pos = (self.bottom_left_coordinate[0] + offset, self.bottom_left_coordinate[1])
+            self.draw_dashed_line(screen, (255, 255, 255), start_pos, end_pos, 2)
+
 
 class ToggleButton:
     def __init__(self, position= ((Width-200, 400)), w = 30, h=30, state=False, color=(40, 40, 10), activeColor=(240, 140, 60)):

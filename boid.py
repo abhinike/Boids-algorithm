@@ -4,7 +4,8 @@ from random import uniform
 import colorsys
 from matrix import *
 from math import pi, sin, cos
-from constants import * 
+from constants import *
+from ui import Highway, Highway2 
 
 # def hsvToRGB(h, s, v):
 #     return tuple(round(i * 255) for i in colorsys.hsv_to_rgb(h, s, v))
@@ -50,9 +51,9 @@ class Boid:
             align = align * self.values["alignment"]
             self.acceleration.add(align)
 
-    def limits(self, screen_width, screen_height, highway_width):
-        highway_top = (screen_height - highway_width) // 2
-        highway_bottom = highway_top + highway_width
+    def limits(self, screen_width, screen_height, highway : Highway, highway2 : Highway2):
+        highway_top = 0
+        highway_bottom = highway.bottom_left_coordinate[1]
 
         # Limit x position to screen width
         if self.position.x < 0:
