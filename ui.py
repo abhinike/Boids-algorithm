@@ -150,8 +150,8 @@ class Highway2:
             start_pos = (self.top_left_coordinate[0] + offset, self.top_left_coordinate[1])
             end_pos = (self.bottom_left_coordinate[0] + offset, self.bottom_left_coordinate[1])
             self.draw_dashed_line(screen, (255, 255, 255), 
-                      ((highway_2_polygon[0][0] + highway_2_polygon[3][0]) // 2, 400), 
-                      (0, Height), 2)
+                      (highway_2_polygon[0][0] + ((highway_2_polygon[0][0] + highway_2_polygon[3][0]) // 2) -150, 400), 
+                      (((highway_2_polygon[0][0] + highway_2_polygon[3][0]) // 2) - 150, Height), 2)
 
             # self.draw_dashed_line(screen, (255, 255, 255), start_pos, end_pos, 2)s
 
