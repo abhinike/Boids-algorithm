@@ -17,6 +17,7 @@ window = pygame.display.set_mode(size)  # No FULLSCREEN flag
 clock = pygame.time.Clock()
 fps = 60
 
+
 scale = 40
 Distance = 5
 speed = 0.0005

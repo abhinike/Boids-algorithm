@@ -113,17 +113,26 @@ class Highway2:
     def draw_dashed_line(self, screen, color, start_pos, end_pos, width=1):
         x1, y1 = start_pos
         x2, y2 = end_pos
-        dl = self.dash_length
-        dg = self.dash_gap
+        dash_length = self.dash_length
+        dash_gap = self.dash_gap
+
+        # Calculate the total length of the line
+        total_length = math.hypot(x2 - x1, y2 - y1)
         angle = math.atan2(y2 - y1, x2 - x1)
-        dx = dl * math.cos(angle)
-        dy = dl * math.sin(angle)
-        gap_dx = dg * math.cos(angle)
-        gap_dy = dg * math.sin(angle)
-        while math.hypot(x2 - x1, y2 - y1) > dl:
-            pygame.draw.line(screen, color, (x1, y1), (x1 + dx, y1 + dy), width)
-            x1 += dx + gap_dx
-            y1 += dy + gap_dy
+
+        # Calculate the unit direction vector
+        dx = math.cos(angle)
+        dy = math.sin(angle)
+
+        # Iterate through the line, drawing dashes and gaps
+        current_length = 0
+        while current_length + dash_length < total_length:
+            end_x = x1 + dx * dash_length
+            end_y = y1 + dy * dash_length
+            pygame.draw.line(screen, color, (x1, y1), (end_x, end_y), width)
+            x1 += (dash_length + dash_gap) * dx
+            y1 += (dash_length + dash_gap) * dy
+            current_length += dash_length + dash_gap
 
     def render(self, screen):
         # Define the polygon points for the highway at a 30-degree angle
@@ -140,7 +149,11 @@ class Highway2:
             offset = i * self.lane_width
             start_pos = (self.top_left_coordinate[0] + offset, self.top_left_coordinate[1])
             end_pos = (self.bottom_left_coordinate[0] + offset, self.bottom_left_coordinate[1])
-            self.draw_dashed_line(screen, (255, 255, 255), start_pos, end_pos, 2)
+            self.draw_dashed_line(screen, (255, 255, 255), 
+                      ((highway_2_polygon[0][0] + highway_2_polygon[3][0]) // 2, 400), 
+                      (0, Height), 2)
+
+            # self.draw_dashed_line(screen, (255, 255, 255), start_pos, end_pos, 2)s
 
 
 class ToggleButton:
