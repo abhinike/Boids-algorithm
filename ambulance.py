@@ -118,3 +118,5 @@ class AmbulanceBoid(Boid):
                         avoidance_vector.normalize()
                         avoidance_vector = avoidance_vector * 2
                         boid.velocity = boid.velocity + avoidance_vector 
+                        
+                        

@@ -24,7 +24,7 @@ speed = 0.0005
 
 flock = []
 #number of boids
-n = 20
+n = 10
 #radius of perception of each boid
 
 # Calculate lane positions
@@ -35,7 +35,7 @@ highway_top = (Height - highway_height) // 2
 
 # Calculate the center y-coordinate for each lane
 lane_1_y = highway_top + (lane_height / 2)  # Top lane center
-lane_2_y = lane_1_y + lane_height  - 120        # Middle lane center
+lane_2_y = lane_1_y + lane_height  - 150        # Middle lane center
 lane_3_y = lane_2_y + lane_height          # Bottom lane center
 
 lanes = [lane_1_y, lane_2_y, lane_3_y]  # Fixed lane options
@@ -56,6 +56,32 @@ ambulance = AmbulanceBoid(
 )
 flock.append(ambulance)
  
+def update_boids():
+    global flock, ambulance
+    ambulance_lane = ambulance.position.y  # FIX: Use position.y instead of y
+    
+    for boid in flock:
+        if isinstance(boid, AmbulanceBoid):
+            continue
+        
+        if ambulance_lane == lane_1_y and boid.position.y == lane_1_y:
+            boid.position.y = lane_2_y
+        
+        elif boid.position.y == lane_2_y:
+            for other in flock:
+                if other.position.y == lane_2_y and abs(boid.position.x - other.position.x) < 50:
+                    if random.random() < 0.5:
+                        boid.speed = 1
+                    else:
+                        boid.position.y = lane_3_y
+
+        elif boid.position.y == lane_3_y:
+            for other in flock:
+                if other.position.y == lane_3_y and abs(boid.position.x - other.position.x) < 50:
+                    boid.speed = 1
+
+update_boids()
+              
 
 textI = "10"
 reset = False
