@@ -9,10 +9,11 @@ from constants import *
 class AmbulanceBoid(Boid):
     def __init__(self, x, y):
         super().__init__(x, y)
-        self.max_speed = 10  # Ambulance moves faster
-        self.min_speed = 7   # Minimum speed for ambulance
-        self.color = (255, 255, 255)  # Purple color for ambulance
-        self.siren_radius = 200  # Radius within which other boids react
+        self.max_speed = 5
+        self.min_speed = 7
+        self.color = (143, 85, 172)
+        self.siren_radius = 150  # Increased radius to detect boids earlier
+        self.warning_radius = 200  # Radius within which other boids react
 
     def update(self):
         # Update position and velocity
@@ -55,22 +56,65 @@ class AmbulanceBoid(Boid):
             
         # No alignment or cohesion - ambulance maintains its own path
 
+    def find_best_lane(self, boid, flock, highway_height, screen_height):
+        lane_height = highway_height / 3
+        highway_top = (screen_height - highway_height) // 2
+        
+        lane_1_y = highway_top + (lane_height / 2)  
+        lane_2_y = lane_1_y + lane_height          
+        lane_3_y = lane_2_y + lane_height          
+        
+        lanes = [lane_1_y, lane_2_y, lane_3_y]
+        
+        # Check current lane
+        current_lane = min(lanes, key=lambda lane: abs(lane - boid.position.y))
+        
+        # Check occupied lanes
+        occupied_lanes = set()
+        safety_radius = 50  # Space check for occupied lanes
+        
+        for other_boid in flock:
+            if other_boid != boid and not isinstance(other_boid, AmbulanceBoid):
+                for lane_y in lanes:
+                    if abs(other_boid.position.y - lane_y) < safety_radius:
+                        occupied_lanes.add(lane_y)
+        
+        # Filter only unoccupied lanes
+        available_lanes = [lane for lane in lanes if lane not in occupied_lanes]
+
+        if available_lanes:
+            return min(available_lanes, key=lambda lane: abs(lane - current_lane))
+        else:
+            return current_lane  # Stay in current lane if no open lane found
+
+
     def activate_siren(self, flock):
+        highway_height = 400  # Total height of highway
+        
         for boid in flock:
             if isinstance(boid, AmbulanceBoid):
-                continue
+                continue  # Ignore itself
             
             dist = getDistance(self.position, boid.position)
-            if dist < self.siren_radius:
-                # Calculate relative position
-                avoidance_vector = SubVectors(boid.position, self.position)
-                avoidance_vector.normalize()
+            
+            # If within warning radius, start lane switching preparation
+            if dist < self.warning_radius:
+                target_lane_y = self.find_best_lane(boid, flock, highway_height, Height)
+
+                # Smooth movement to new lane
+                if abs(boid.position.y - target_lane_y) > 1:
+                    move_direction = 1 if target_lane_y > boid.position.y else -1
+                    move_speed = min(2.0, 5.0 * (self.warning_radius - dist) / self.warning_radius)
+                    boid.position.y += move_direction * move_speed
                 
-                # Stronger avoidance force
-                avoidance_vector = avoidance_vector * 3
-                
-                # Apply the avoidance force
-                boid.velocity = boid.velocity + avoidance_vector
-                
-                # Slow down other boids more significantly
-                boid.velocity.limit(boid.max_speed * 0.4)
+                # Slow down slightly while changing lanes
+                if dist < self.siren_radius:
+                    slow_factor = 0.4 + (0.3 * (dist / self.siren_radius))
+                    boid.velocity.limit(boid.max_speed * slow_factor)
+
+                    # Additional horizontal avoidance if very close
+                    if dist < self.siren_radius * 0.5:
+                        avoidance_vector = SubVectors(boid.position, self.position)
+                        avoidance_vector.normalize()
+                        avoidance_vector = avoidance_vector * 2
+                        boid.velocity = boid.velocity + avoidance_vector 
