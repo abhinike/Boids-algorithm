@@ -1,1 +1,2 @@
-e
+
+		if event.type == pygame.QUIT:
