@@ -53,7 +53,8 @@ class Boid:
 
     def limits(self, screen_width, screen_height, highway : Highway, highway2 : Highway2):
         highway_top = 0
-        highway_bottom = highway.bottom_left_coordinate[1]
+        highway_bottom = highway.bottom_left_coordinate[1] - 50
+        
 
         # Limit x position to screen width
         if self.position.x < 0:

@@ -8,5 +8,6 @@ Nolanes = 4
 HighwayWidth = 400
 
 
-HighwayTop = (Height - HighwayWidth) // 2
+# HighwayTop = (Height - HighwayWidth) // 2
+HighwayTop = 0
 HighwayBottom = HighwayTop + HighwayWidth

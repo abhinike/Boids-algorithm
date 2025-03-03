@@ -23,7 +23,7 @@ Distance = 5
 speed = 0.0005
 
 flock = []
-#number of boids
+#number of cars
 n = 20
 #radius of perception of each boid
 
@@ -60,6 +60,10 @@ while run:
 			run = False
 		if event.type == pygame.MOUSEBUTTONUP:
 			clicked = True
+		if event.type == pygame.MOUSEBUTTONDOWN:  # Detect tap
+			x, y = event.pos
+			flock.append(Boid(x, y))
+
 		if event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_ESCAPE:
 				run = False
