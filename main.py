@@ -30,7 +30,7 @@ n = 20
 
 
 for i in range(n):
-	flock.append(Boid(random.randint(20, Width-20), random.randint(20, Height-20)))
+	flock.append(Boid(random.randint(20, Width-20), random.randint(20, 400-20)))
  
  
  

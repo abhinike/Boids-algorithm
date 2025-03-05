@@ -31,10 +31,13 @@ class Boid:
         self.hue = 0
         self.toggles = {"separation": True, "alignment": True, "cohesion": True}
         self.values = {"separation": 0.1, "alignment": 0.1, "cohesion": 0.1}
-        self.radius = 40
+        self.radius = 60
 
     def behaviour(self, flock):
         self.acceleration.reset()
+        # self.acceleration.add(self.separation(flock) * 0.05)  # Reduced from 0.1 to 0.05
+        # self.acceleration.add(self.cohesion(flock) * 0.05)  # Reduced from 0.1 to 0.05
+        # self.acceleration.add(self.alignment(self) * 0.05)  # Reduced from 0.1 to 0.05
 
         if self.toggles["separation"]:
             avoid = self.separation(flock)
@@ -146,7 +149,7 @@ class Boid:
         self.velocity.x = abs(self.velocity.x) * 1.5  # Ensure positive horizontal direction
         self.velocity.normalize()
         self.position = self.position + self.velocity
-        self.velocity = self.velocity + self.acceleration
+        self.velocity += self.acceleration * 0.5  # Reduce impact of acceleration
         self.velocity.limit(self.max_speed)
         self.angle = self.velocity.heading() + pi / 2
 
