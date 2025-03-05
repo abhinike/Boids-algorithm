@@ -23,6 +23,7 @@ Distance = 5
 speed = 0.0005
 
 flock = []
+obstacles	 = []
 #number of cars
 n = 20
 #radius of perception of each boid
@@ -94,7 +95,7 @@ while run:
 		boid.radius = scale
 		boid.limits(Width, Height,  highway, highway2 )
 		boid.behaviour(flock)
-		boid.update()
+		boid.update(flock, obstacles)
 		boid.hue += speed
 		boid.Draw(window, Distance, scale)
 

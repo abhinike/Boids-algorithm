@@ -6,6 +6,7 @@ from matrix import *
 from math import pi, sin, cos
 from constants import *
 from ui import Highway, Highway2 
+import math
 
 # def hsvToRGB(h, s, v):
 #     return tuple(round(i * 255) for i in colorsys.hsv_to_rgb(h, s, v))
@@ -14,7 +15,7 @@ class Boid:
     def __init__(self, x, y):
         self.position = Vector(x, y)
         vec_x = uniform(0.5, 1)
-        vec_y = uniform(-0.5, 0.5)
+        vec_y = uniform(0, 0.5)
         self.velocity = Vector(vec_x, vec_y)
         self.velocity.normalize()
         # Set a random magnitude
@@ -31,7 +32,7 @@ class Boid:
         self.hue = 0
         self.toggles = {"separation": True, "alignment": True, "cohesion": True}
         self.values = {"separation": 0.1, "alignment": 0.1, "cohesion": 0.1}
-        self.radius = 60
+        self.radius = 200
 
     def behaviour(self, flock):
         self.acceleration.reset()
@@ -143,8 +144,8 @@ class Boid:
 
         return steering
 
-    def update(self):
-        
+    def update(self, flock, obstacles):
+        self.loss = self.calculate_loss(flock, obstacles)  # Store loss for display
         # Increase the horizontal component
         self.velocity.x = abs(self.velocity.x) * 1.5  # Ensure positive horizontal direction
         self.velocity.normalize()
@@ -152,6 +153,42 @@ class Boid:
         self.velocity += self.acceleration * 0.5  # Reduce impact of acceleration
         self.velocity.limit(self.max_speed)
         self.angle = self.velocity.heading() + pi / 2
+        
+
+
+    def calculate_loss(self, flock, obstacles, alpha=1, beta=1, gamma=5, delta=1, d_safe=10):
+        loss = 0
+        penalty = 0
+        epsilon = 1e-6  # Small value to prevent log(0)
+        scale_factor = 1000  # Scaling before log
+
+        for mate in flock:
+            if mate is not self:
+                dij = getDistance(self.position, mate.position)
+                if dij > 0:
+                    # Exponential inverse distance penalty
+                    loss += alpha * math.exp(-dij / d_safe)
+
+                    # Stronger penalty when too close
+                    if dij < d_safe:
+                        penalty += gamma * math.exp(-dij / d_safe)
+
+        nearest_obstacle_dist = min(
+            [getDistance(self.position, obs.position) for obs in obstacles] or [float('inf')]
+        )
+        if nearest_obstacle_dist > 0:
+            loss += beta * math.exp(-nearest_obstacle_dist / d_safe)
+
+        # Add penalties
+        loss += penalty
+
+        # Apply log scaling for visibility
+        scaled_loss = math.log1p(loss * scale_factor) * 10  # log(1 + x) avoids log(0)
+        
+        return max(0, min(scaled_loss, 100))  # Clamp between 0-100
+
+
+
 
     def Draw(self, screen, distance, scale):
         ps = []
@@ -180,3 +217,8 @@ class Boid:
 
         pygame.draw.polygon(screen, self.secondaryColor, ps)
         pygame.draw.polygon(screen, self.color, ps, self.stroke)
+        
+        # Display loss value
+        font = pygame.font.Font(None, 20)
+        loss_text = font.render(f"{self.loss:.2f}", True, (255, 0, 0))
+        screen.blit(loss_text, (self.position.x + 5, self.position.y - 10))
