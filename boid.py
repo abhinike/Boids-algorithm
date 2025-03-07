@@ -33,7 +33,7 @@ class Boid:
         self.hue = 0
         self.toggles = {"separation": True, "alignment": True, "cohesion": True}
         self.values = {"separation": 0.1, "alignment": 0.1, "cohesion": 0.1}
-        self.radius = 200
+        self.radius = 300
         self.desired_speed = self.max_speed # Initialize desired speed
         self.highway = highway
 
@@ -163,11 +163,9 @@ class Boid:
 
     def update(self, flock, obstacles):
         self.loss = self.calculate_loss(flock, obstacles)  # Store loss for display
-        # Increase the horizontal component
-        self.velocity.x = abs(self.velocity.x) * 1.5  # Ensure positive horizontal direction
-        self.velocity.normalize()
+
         
-        
+        self.highway.update_velocity(self)
 
         self.adjust_speed(flock) # Adjust speed based on surroundings
 

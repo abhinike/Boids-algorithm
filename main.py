@@ -12,7 +12,7 @@ window = pygame.display.set_mode((400, 900), pygame.FULLSCREEN)
 
 # size = (800, 600)  # Example dimensions for a smaller window
 
-window = pygame.display.set_mode(size)  # No FULLSCREEN flag
+window = pygame.display.set_mode(size)
 
 clock = pygame.time.Clock()
 fps = 60
@@ -33,7 +33,8 @@ n = 20
 for i in range(n):
 	flock.append(Boid(random.randint(20, Width-20), random.randint(20, 400-20), highway1))
  
- 
+#testing highway2
+flock.append(Boid(0, Height, highway2))
  
 
 textI = "10"
@@ -63,7 +64,10 @@ while run:
 			clicked = True
 		if event.type == pygame.MOUSEBUTTONDOWN:  # Detect tap
 			x, y = event.pos
-			flock.append(Boid(x, y, highway1))
+			if highway1.on_road((x, y)):
+				flock.append(Boid(x, y, highway1))
+			if highway2.on_road((x, y)):
+				flock.append(Boid(x, y, highway2))
 
 		if event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_ESCAPE:
