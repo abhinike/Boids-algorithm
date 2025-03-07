@@ -25,7 +25,7 @@ class Boid:
         self.color = (255, 255, 255)
         self.temp = self.color
         self.secondaryColor = (70, 70, 70)
-        self.max_speed = 5
+        self.max_speed = 3
         self.max_length = 1
         self.size = 2
         self.stroke = 5
@@ -36,9 +36,10 @@ class Boid:
         self.radius = 300
         self.desired_speed = self.max_speed # Initialize desired speed
         self.highway = highway
+        self.speed = uniform(1.5 , 4)
 
     def behaviour(self, flock):
-        self.acceleration.reset()
+        # self.acceleration.reset()
         # self.acceleration.add(self.separation(flock) * 0.05)  # Reduced from 0.1 to 0.05
         # self.acceleration.add(self.cohesion(flock) * 0.05)  # Reduced from 0.1 to 0.05
         # self.acceleration.add(self.alignment(self) * 0.05)  # Reduced from 0.1 to 0.05

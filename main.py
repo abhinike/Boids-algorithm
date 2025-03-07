@@ -31,11 +31,12 @@ n = 20
 
 
 for i in range(n):
-	flock.append(Boid(random.randint(20, Width-20), random.randint(20, 400-20), highway1))
+	flock.append(Boid(random.randint(20, Width-20), random.randint(10, 400-10), highway1))
  
 #testing highway2
-flock.append(Boid(0, Height, highway2))
- 
+flock.append(Boid(100, Height, highway2))
+flock.append(Boid(220, Height -100, highway2))
+
 
 textI = "10"
 reset = False

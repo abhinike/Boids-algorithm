@@ -1,3 +1,4 @@
+import random
 from codecs import strict_errors
 
 import pygame
@@ -96,6 +97,7 @@ class Highway1(Highway):  # Horizontal Highway
             boid.position.x = self.length
         elif boid.position.x > self.length:
             boid.position.x = 0
+            # boid.position.y = random.randint(0, 400)
 
         highway_top = 0
         highway_bottom = self.bottom_left_coordinate[1]
@@ -124,8 +126,9 @@ class Highway1(Highway):  # Horizontal Highway
 
     def update_velocity(self, boid):
         # Increase the horizontal component
-        boid.velocity.x = abs(boid.velocity.x) * 1.5  # Ensure positive horizontal direction
-        boid.velocity.normalize()
+        boid.velocity.x = abs(boid.velocity.x) * 1.3 # Ensure positive horizontal direction
+        boid.velocity*=boid.desired_speed
+        # boid.velocity.normalize()
 
     def on_road(self, point: tuple[float, float]) -> bool:
         """Check if a point is within the rectangular boundary of the highway"""
@@ -235,7 +238,7 @@ class Highway2(Highway):  # Angled Highway
         velocity_magnitude = boid.velocity.magnitude()  # Get current speed
         boid.velocity = highway_direction * velocity_magnitude * 1.5  # Increase speed along highway direction
 
-        boid.velocity.normalize()  # Normalize velocity to prevent excessive acceleration
+        # boid.velocity.normalize()  # Normalize velocity to prevent excessive acceleration
 
     def on_road(self, point: tuple[float, float]) -> bool:
         """Check if a point is within the quadrilateral highway using area method"""
