@@ -1,23 +1,24 @@
 import pygame
+from highway import Highway
 from tools import *
 from random import uniform
 import colorsys
 from matrix import *
 from math import pi, sin, cos
 from constants import *
-from ui import Highway, Highway2 
+
 import math
 
 # def hsvToRGB(h, s, v):
 #     return tuple(round(i * 255) for i in colorsys.hsv_to_rgb(h, s, v))
 
 class Boid:
-    def __init__(self, x, y):
+    def __init__(self, x, y, highway: Highway):
         self.position = Vector(x, y)
         vec_x = uniform(0.5, 1)
         vec_y = uniform(0, 0.5)
         self.velocity = Vector(vec_x, vec_y)
-        self.velocity.normalize()
+        # self.velocity.normalize()
         # Set a random magnitude
         self.velocity = self.velocity * uniform(1.5, 4)
         self.acceleration = Vector()
@@ -33,6 +34,8 @@ class Boid:
         self.toggles = {"separation": True, "alignment": True, "cohesion": True}
         self.values = {"separation": 0.1, "alignment": 0.1, "cohesion": 0.1}
         self.radius = 200
+        self.desired_speed = self.max_speed # Initialize desired speed
+        self.highway = highway
 
     def behaviour(self, flock):
         self.acceleration.reset()
@@ -55,22 +58,11 @@ class Boid:
             align = align * self.values["alignment"]
             self.acceleration.add(align)
 
-    def limits(self, screen_width, screen_height, highway : Highway, highway2 : Highway2):
-        highway_top = 0
-        highway_bottom = highway.bottom_left_coordinate[1] - 50
-        
+    def limits(self):
+       
 
-        # Limit x position to screen width
-        if self.position.x < 0:
-            self.position.x = screen_width
-        elif self.position.x > screen_width:
-            self.position.x = 0
 
-        # Limit y position to highway boundaries
-        if self.position.y < highway_top:
-            self.position.y = highway_top
-        elif self.position.y > highway_bottom:
-            self.position.y = highway_bottom
+        self.highway.limits(self)
 
     def separation(self, flockMates):
         total = 0
@@ -83,16 +75,10 @@ class Boid:
                 temp = temp / (dist ** 2)
                 steering.add(temp)
                 total += 1
-        
-        # Avoid edges of the highway
-        if self.position.y - self.radius < HighwayTop:
-            edge_steering = Vector(0, 1)
-            steering.add(edge_steering)
-            total += 1
-        elif self.position.y + self.radius > HighwayBottom:
-            edge_steering = Vector(0, -1)
-            steering.add(edge_steering)
-            total += 1
+
+        total_from_highway_boundary , steering_from_highway_boundary  = self.highway.avoid_boundary(self)
+        total+=total_from_highway_boundary
+        steering.add(steering_from_highway_boundary)
 
         if total > 0:
             steering = steering / total
@@ -144,16 +130,58 @@ class Boid:
 
         return steering
 
+    def adjust_speed(self, flock, look_ahead_distance=150, slow_factor=0.5):
+        """Adjust speed based on nearby boids in front."""
+        boids_ahead = 0
+        closest_boid_distance = look_ahead_distance  # Initialize to max look ahead distance
+
+        for mate in flock:
+            if mate is not self:
+                to_mate = SubVectors(mate.position, self.position)
+                distance_to_mate = to_mate.magnitude()
+
+                # Check if mate is within look ahead distance
+                if distance_to_mate < look_ahead_distance:
+                    forward_direction = self.velocity.Normalize()
+                    angle_to_mate = angle_between_vectors(forward_direction, to_mate)
+
+                    # Consider "ahead" if angle is small (e.g., within 45 degrees on either side)
+                    if angle_to_mate < pi / 4 : # 45 degrees in radians
+                        boids_ahead += 1
+                        closest_boid_distance = min(closest_boid_distance, distance_to_mate)
+
+        if boids_ahead > 0:
+            # Reduce desired speed if boids ahead, more reduction if closer
+            # Example: Reduce speed proportionally to how much of look_ahead_distance is remaining
+            speed_reduction_factor = (closest_boid_distance / look_ahead_distance)
+            self.desired_speed = self.max_speed * speed_reduction_factor * slow_factor # slow_factor to control intensity
+            self.desired_speed = max(1, self.desired_speed) # Minimum speed to avoid complete stop
+        else:
+            # Speed up to max speed if no boids ahead
+            self.desired_speed = self.max_speed
+
+
     def update(self, flock, obstacles):
         self.loss = self.calculate_loss(flock, obstacles)  # Store loss for display
         # Increase the horizontal component
         self.velocity.x = abs(self.velocity.x) * 1.5  # Ensure positive horizontal direction
         self.velocity.normalize()
+        
+        
+
+        self.adjust_speed(flock) # Adjust speed based on surroundings
+
+        # Move towards desired speed
+        speed_difference = self.desired_speed - self.velocity.magnitude()
+        speed_adjust_accel = self.velocity.Normalize() * speed_difference * 0.1 # 0.1 is dampening factor for speed change
+        self.acceleration.add(speed_adjust_accel)
+
+
         self.position = self.position + self.velocity
         self.velocity += self.acceleration * 0.5  # Reduce impact of acceleration
-        self.velocity.limit(self.max_speed)
+        self.velocity.limit(self.max_speed) # Still limit by max_speed for overall control
         self.angle = self.velocity.heading() + pi / 2
-        
+        self.acceleration.reset() # Reset acceleration after applying it
 
 
     def calculate_loss(self, flock, obstacles, alpha=1, beta=1, gamma=5, delta=1, d_safe=10):
@@ -184,10 +212,8 @@ class Boid:
 
         # Apply log scaling for visibility
         scaled_loss = math.log1p(loss * scale_factor) * 10  # log(1 + x) avoids log(0)
-        
+
         return max(0, min(scaled_loss, 100))  # Clamp between 0-100
-
-
 
 
     def Draw(self, screen, distance, scale):
@@ -217,7 +243,7 @@ class Boid:
 
         pygame.draw.polygon(screen, self.secondaryColor, ps)
         pygame.draw.polygon(screen, self.color, ps, self.stroke)
-        
+
         # Display loss value
         font = pygame.font.Font(None, 20)
         loss_text = font.render(f"{self.loss:.2f}", True, (255, 0, 0))

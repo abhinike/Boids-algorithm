@@ -1,4 +1,5 @@
-from math import sqrt, atan2
+
+from math import sqrt, atan2, acos, degrees
 import colorsys
 NEIGHBORHOOD_RADIUS = 40
 
@@ -46,7 +47,7 @@ class Vector:
 		if mag != 0:
 			return Vector(self.x/mag, self.y/mag)
 		else:
-			return Vector(1, 1)
+			return Vector(5, 5)
 
 	def heading(self):
 		angle = atan2(self.y, self.x)
@@ -60,7 +61,7 @@ class Vector:
 			self.y = self.y/sqrt(squared_mag)
 			self.x = self.x * max_length
 			self.y = self.y * max_length
-   
+
 	def reset(self, x=0, y=0):
 		self.x = x
 		self.y = y
@@ -84,3 +85,12 @@ def hsv_to_rgb(h, s, v):
 
 def SubVectors(v1, v2):
 	return Vector(v1.x - v2.x, v1.y - v2.y)
+
+def angle_between_vectors(v1, v2):
+    """Calculates the angle in radians between two vectors."""
+    v1_u = v1.Normalize()
+    v2_u = v2.Normalize()
+    dot_product = v1_u.x * v2_u.x + v1_u.y * v2_u.y # Dot product
+    # Clamp to avoid domain errors with acos near -1 and 1
+    dot_product = max(-1.0, min(1.0, dot_product))
+    return acos(dot_product)

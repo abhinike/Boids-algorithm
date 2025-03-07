@@ -1,3 +1,4 @@
+from highway import Highway1, Highway2
 from ui import *
 from constants import *
 
@@ -5,7 +6,7 @@ panel = Panel()
 panel.color = (0, 0, 0)
 resetButton = Button("Reset")
 
-highway = Highway1()
+highway1 = Highway1()
 highway2 = Highway2(screen_width=Width)
 
 Behaviours = TextUI("BEHAVIOURS", (Width-180, 120), (255, 255, 255))

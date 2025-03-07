@@ -31,7 +31,7 @@ n = 20
 
 
 for i in range(n):
-	flock.append(Boid(random.randint(20, Width-20), random.randint(20, 400-20)))
+	flock.append(Boid(random.randint(20, Width-20), random.randint(20, 400-20), highway1))
  
  
  
@@ -49,7 +49,7 @@ while run:
 	window.fill((10, 10, 15))
  
 	#render highway
-	highway.render(screen=window)
+	highway1.render(screen=window)
 	highway2.render(screen=window)
 	
 
@@ -63,7 +63,7 @@ while run:
 			clicked = True
 		if event.type == pygame.MOUSEBUTTONDOWN:  # Detect tap
 			x, y = event.pos
-			flock.append(Boid(x, y))
+			flock.append(Boid(x, y, highway1))
 
 		if event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_ESCAPE:
@@ -85,7 +85,7 @@ while run:
 	if reset == True or resetButton.state == True:
 		flock = []
 		for i in range(n):
-			flock.append(Boid(random.randint(20, Width-20), random.randint(20, Height-20)))
+			flock.append(Boid(random.randint(20, Width-20), random.randint(20, Height-20), highway1))
 		reset = False
 
 	
@@ -93,7 +93,7 @@ while run:
 		boid.toggles = {"separation": toggleSeparation.state, "alignment": toggleAlignment.state,"cohesion": toggleCohesion.state}
 		boid.values = {"separation": separationInput.value/100, "alignment": alignmentInput.value/100,"cohesion": cohesionInput.value/100}
 		boid.radius = scale
-		boid.limits(Width, Height,  highway, highway2 )
+		boid.limits( )
 		boid.behaviour(flock)
 		boid.update(flock, obstacles)
 		boid.hue += speed

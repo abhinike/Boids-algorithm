@@ -1,3 +1,5 @@
+from codecs import strict_errors
+
 import pygame
 from constants import *
 from tools import *
@@ -17,6 +19,16 @@ class Highway(ABC):  # Abstract base class
     @abstractmethod
     def render(self, screen):
         """Abstract method to render the highway"""
+        pass
+    
+    @abstractmethod
+    def limits(self, boid ):
+        """Abstract method to keep boids within highway boundaries"""
+        pass
+
+    @abstractmethod
+    def avoid_boundary(self, boid ):
+        """Abstract method to avoid boundary of highway"""
         pass
 
     def draw_dashed_line(self, screen, color, start_pos, end_pos, width=1):
@@ -57,11 +69,7 @@ class Highway1(Highway):  # Horizontal Highway
             lane_y = highway_rect.top + i * self.lane_width
             self.draw_dashed_line(screen, (255, 255, 255), (0, lane_y), (self.length, lane_y), 2)
 
-    def update_boids(self):
-        """Update all boids based on their behavior"""
-        for boid in self.boids:
-            boid.behaviour(self.boids)
-            boid.update(self.length, self.width, self)
+
 
     def limits(self, boid):
         """Keep boids within highway boundaries"""
@@ -78,58 +86,27 @@ class Highway1(Highway):  # Horizontal Highway
         elif boid.position.y > highway_bottom:
             boid.position.y = highway_bottom
 
-    def separation(self, boid):
-        """Boid separation logic"""
-        steering = Vector()
+    def avoid_boundary(self, boid):
         total = 0
-
-        for mate in self.boids:
-            dist = getDistance(boid.position, mate.position)
-            if mate is not boid and dist < boid.radius:
-                if dist > 0:  # ✅ FIXED: Prevent division by zero
-                    steering.add((boid.position - mate.position) / (dist ** 2))
-                    total += 1
-
-        if total > 0:
-            steering = (steering / total).normalize() * boid.max_speed - boid.velocity
-            steering.limit(boid.max_length)
-
-        return steering
+        steering = Vector(0, 0)
 
 
-    def alignment(self, boid):
-        """Boid alignment logic"""
-        steering = Vector()
-        total = 0
+        # Avoid edges of the highway
+        if boid.position.y - boid.radius < HighwayTop:
+            edge_steering = Vector(0, 1)
+            steering.add(edge_steering)
+            total += 1
+        elif boid.position.y + boid.radius > HighwayBottom:
+            edge_steering = Vector(0, -1)
+            steering.add(edge_steering)
+            total += 1
 
-        for mate in self.boids:
-            dist = getDistance(boid.position, mate.position)
-            if mate is not boid and dist < boid.radius:
-                steering.add(mate.velocity.normalize())
-                total += 1
+        return total, steering
 
-        if total > 0:
-            steering = (steering / total).normalize() * boid.max_speed - boid.velocity.normalize()
-            steering.limit(boid.max_length)
 
-        return steering
 
-    def cohesion(self, boid):
-        """Boid cohesion logic"""
-        steering = Vector()
-        total = 0
 
-        for mate in self.boids:
-            dist = getDistance(boid.position, mate.position)
-            if mate is not boid and dist < boid.radius:
-                steering.add(mate.position)
-                total += 1
-
-        if total > 0:
-            steering = (steering / total - boid.position).normalize() * boid.max_speed - boid.velocity
-            steering.limit(boid.max_length)
-
-        return steering
+    
 
 
 class Highway2(Highway):  # Angled Highway
@@ -151,6 +128,28 @@ class Highway2(Highway):  # Angled Highway
             self.top_right_coordinate
         ]
         pygame.draw.polygon(screen, (50, 50, 50), highway_2_polygon)
+        
+        
+    def limits(self, boid):
+        return super().limits(boid)
+
+
+    def avoid_boundary(self, boid):
+        total = 0
+        steering = Vector(0, 0)
+
+
+        # Avoid edges of the highway
+        if boid.position.y - boid.radius < HighwayTop:
+            edge_steering = Vector(0, 1)
+            steering.add(edge_steering)
+            total += 1
+        elif boid.position.y + boid.radius > HighwayBottom:
+            edge_steering = Vector(0, -1)
+            steering.add(edge_steering)
+            total += 1
+
+        return total, steering
 
 
 
