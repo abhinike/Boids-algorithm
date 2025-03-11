@@ -22,12 +22,14 @@ AlignmentValue = TextUI("alignmentValue: ", (Width-245, 365), (255, 255, 255))
 CohesionValue = TextUI("cohesionValue: ", (Width-245, 415), (255, 255, 255))
 NumberOfBoids = TextUI("Number of Boids: ", (Width-245, 465), (255, 255, 255))
 ScaleText = TextUI("Car-size (radius): ", (Width-200, 520), (255, 255, 255))
+AverageLossText = TextUI("Avg Loss: ", (Width-225, 700), (255, 255, 255))
+
 
 toggleSeparation = ToggleButton((Width-160, 170), 20, 20, True)
 toggleAlignment = ToggleButton((Width-160, 210), 20, 20, True)
 toggleCohesion= ToggleButton((Width-160, 250), 20, 20, True)
 
-separationInput = DigitInput(30, (Width-160, 300), 80, 30)
+separationInput = DigitInput(100, (Width-160, 300), 80, 30)
 alignmentInput = DigitInput(20, (Width-160, 350), 80, 30)
 cohesionInput = DigitInput(10, (Width-160, 400), 80, 30)
 numberInput = DigitInput(15, (Width-160, 450), 80, 30)

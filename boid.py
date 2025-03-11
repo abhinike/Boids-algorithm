@@ -33,7 +33,7 @@ class Boid:
         self.hue = 0
         self.toggles = {"separation": True, "alignment": True, "cohesion": True}
         self.values = {"separation": 0.1, "alignment": 0.1, "cohesion": 0.1}
-        self.radius = 300
+        self.radius = 500
         self.desired_speed = self.max_speed # Initialize desired speed
         self.highway = highway
         self.speed = uniform(1.5 , 4)
@@ -131,7 +131,7 @@ class Boid:
 
         return steering
 
-    def adjust_speed(self, flock, look_ahead_distance=150, slow_factor=0.5):
+    def adjust_speed(self, flock, look_ahead_distance=150, slow_factor=0.8):
         """Adjust speed based on nearby boids in front."""
         boids_ahead = 0
         closest_boid_distance = look_ahead_distance  # Initialize to max look ahead distance
@@ -189,7 +189,44 @@ class Boid:
         epsilon = 1e-6  # Small value to prevent log(0)
         scale_factor = 1000  # Scaling before log
 
+
+
         for mate in flock:
+            if mate is not self:
+                dij = getDistance(self.position, mate.position)
+                if dij > 0:
+                    # Exponential inverse distance penalty
+                    loss += alpha * math.exp(-dij / d_safe)
+
+                    # Stronger penalty when too close
+                    if dij < d_safe:
+                        penalty += gamma * math.exp(-dij / d_safe)
+
+        nearest_obstacle_dist = min(
+            [getDistance(self.position, obs.position) for obs in obstacles] or [float('inf')]
+        )
+        if nearest_obstacle_dist > 0:
+            loss += beta * math.exp(-nearest_obstacle_dist / d_safe)
+
+        # Add penalties
+        loss += penalty
+
+        # Apply log scaling for visibility
+        scaled_loss = math.log1p(loss * scale_factor) * 10  # log(1 + x) avoids log(0)
+
+        return max(0, min(scaled_loss, 100))  # Clamp between 0-100
+
+    def calculate_loss_front(self, flock, obstacles, alpha=1, beta=1, gamma=5, delta=1, d_safe=10):
+        loss = 0
+        penalty = 0
+        epsilon = 1e-6  # Small value to prevent log(0)
+        scale_factor = 1000  # Scaling before log
+
+        # filterflock for boids that are ahead only
+        flock_ahead = [mate for mate in flock if mate is not self and mate.position[0] > self.position[0]]
+
+
+        for mate in flock_ahead:
             if mate is not self:
                 dij = getDistance(self.position, mate.position)
                 if dij > 0:
