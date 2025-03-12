@@ -37,6 +37,8 @@ class Boid:
         self.desired_speed = self.max_speed # Initialize desired speed
         self.highway = highway
         self.speed = uniform(1.5 , 4)
+        self.loss = 0
+        self.front_loss = 0
 
     def behaviour(self, flock):
         # self.acceleration.reset()
@@ -164,8 +166,7 @@ class Boid:
 
     def update(self, flock, obstacles):
         self.loss = self.calculate_loss(flock, obstacles)  # Store loss for display
-
-        
+        self.front_loss = self.calculate_loss_front(flock, obstacles)  # Store frontal loss        
         self.highway.update_velocity(self)
 
         self.adjust_speed(flock) # Adjust speed based on surroundings
@@ -222,20 +223,18 @@ class Boid:
         epsilon = 1e-6  # Small value to prevent log(0)
         scale_factor = 1000  # Scaling before log
 
-        # filterflock for boids that are ahead only
-        flock_ahead = [mate for mate in flock if mate is not self and mate.position[0] > self.position[0]]
-
+        # Filter flock for boids that are ahead only (using Vector's x property)
+        flock_ahead = [mate for mate in flock if mate is not self and mate.position.x > self.position.x]
 
         for mate in flock_ahead:
-            if mate is not self:
-                dij = getDistance(self.position, mate.position)
-                if dij > 0:
-                    # Exponential inverse distance penalty
-                    loss += alpha * math.exp(-dij / d_safe)
+            dij = getDistance(self.position, mate.position)
+            if dij > 0:
+                # Exponential inverse distance penalty
+                loss += alpha * math.exp(-dij / d_safe)
 
-                    # Stronger penalty when too close
-                    if dij < d_safe:
-                        penalty += gamma * math.exp(-dij / d_safe)
+                # Stronger penalty when too close
+                if dij < d_safe:
+                    penalty += gamma * math.exp(-dij / d_safe)
 
         nearest_obstacle_dist = min(
             [getDistance(self.position, obs.position) for obs in obstacles] or [float('inf')]

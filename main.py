@@ -48,32 +48,46 @@ def plot_thread():
     fig, ax = plt.subplots()
     ax.set_title("Live Loss Plot")
     ax.set_xlabel("Time (s)")
-    ax.set_ylabel("Average Loss")
-    line, = ax.plot([], [], marker="o", linestyle="-", color="r")
+    ax.set_ylabel("Loss")
+    avg_line, = ax.plot([], [], marker="o", linestyle="-", color="r", label="Avg Loss")
+    front_line, = ax.plot([], [], marker="x", linestyle="-", color="b", label="Front Loss")
+    ax.legend()
 
     time_values = []
-    loss_values = []
+    avg_loss_values = []
+    front_loss_values = []
 
     while run:
-        elapsed_time = (pygame.time.get_ticks() - start_time) / 1000
-        if len(flock) > 0:
-            avg_loss = math.sqrt(sum(boid.loss**2 for boid in flock) / len(flock))
-        else:
-            avg_loss = 0
+        try:
+            elapsed_time = (pygame.time.get_ticks() - start_time) / 1000
+            if len(flock) > 0:
+                # Use getattr with default values to avoid AttributeError
+                avg_loss = math.sqrt(sum(getattr(boid, 'loss', 0)**2 for boid in flock) / len(flock))
+                avg_front_loss = math.sqrt(sum(getattr(boid, 'front_loss', 0)**2 for boid in flock) / len(flock))
+            else:
+                avg_loss = 0
+                avg_front_loss = 0
 
-        time_values.append(elapsed_time)
-        loss_values.append(avg_loss)
+            time_values.append(elapsed_time)
+            avg_loss_values.append(avg_loss)
+            front_loss_values.append(avg_front_loss)
 
-        if len(time_values) > 100:
-            time_values = time_values[-100:]
-            loss_values = loss_values[-100:]
+            if len(time_values) > 100:
+                time_values = time_values[-100:]
+                avg_loss_values = avg_loss_values[-100:]
+                front_loss_values = front_loss_values[-100:]
 
-        line.set_xdata(time_values)
-        line.set_ydata(loss_values)
-        ax.relim()
-        ax.autoscale_view()
-        plt.draw()
-        plt.pause(0.5)
+            avg_line.set_xdata(time_values)
+            avg_line.set_ydata(avg_loss_values)
+            front_line.set_xdata(time_values)
+            front_line.set_ydata(front_loss_values)
+            ax.relim()
+            ax.autoscale_view()
+            plt.draw()
+            plt.pause(0.5)
+        except Exception as e:
+            print(f"Plot thread error: {e}")
+            plt.pause(0.5)
 
     plt.ioff()
     plt.show()
@@ -153,12 +167,17 @@ while run:
         sliderScale.Render(window)
         AverageLossText.Render(window)
 
-        if len(flock) > 0:
-            avg_loss = math.sqrt(sum(boid.loss**2 for boid in flock) / len(flock))
-        else:
-            avg_loss = 0
+        try:
+            if len(flock) > 0:
+                avg_loss = math.sqrt(sum(getattr(boid, 'loss', 0)**2 for boid in flock) / len(flock))
+                avg_front_loss = math.sqrt(sum(getattr(boid, 'front_loss', 0)**2 for boid in flock) / len(flock))
+            else:
+                avg_loss = 0
+                avg_front_loss = 0
 
-        AverageLossText.text = f"Avg Loss: {avg_loss:.2f}"
+            AverageLossText.text = f"Avg Loss: {avg_loss:.2f} | Front Loss: {avg_front_loss:.2f}"
+        except Exception as e:
+            AverageLossText.text = f"Error calculating loss: {e}"
 
     else:
         UItoggle.Render(window)
