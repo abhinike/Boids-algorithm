@@ -1,4 +1,5 @@
 import pygame
+from amubulance import Ambulance
 from boid import Boid
 from tools import Vector
 import math
@@ -6,9 +7,10 @@ import random
 from matrix import *
 from constants import *
 from uiParameters import *
-import matplotlib.pyplot as plt
-import numpy as np
-import threading
+
+# import matplotlib.pyplot as plt
+# import numpy as np
+# import threading
 
 pygame.init()
 
@@ -39,61 +41,61 @@ showUI = False
 clicked = False
 run = True
 
-start_time = pygame.time.get_ticks()
-plot_update_interval = 500
-last_plot_update = 0
+# start_time = pygame.time.get_ticks()
+# plot_update_interval = 500
+# last_plot_update = 0
 
-def plot_thread():
-    plt.ion()
-    fig, ax = plt.subplots()
-    ax.set_title("Live Loss Plot")
-    ax.set_xlabel("Time (s)")
-    ax.set_ylabel("Loss")
-    avg_line, = ax.plot([], [], marker="o", linestyle="-", color="r", label="Avg Loss")
-    front_line, = ax.plot([], [], marker="x", linestyle="-", color="b", label="Front Loss")
-    ax.legend()
+# def plot_thread():
+#     plt.ion()
+#     fig, ax = plt.subplots()
+#     ax.set_title("Live Loss Plot")
+#     ax.set_xlabel("Time (s)")
+#     ax.set_ylabel("Loss")
+#     avg_line, = ax.plot([], [], marker="o", linestyle="-", color="r", label="Avg Loss")
+#     front_line, = ax.plot([], [], marker="x", linestyle="-", color="b", label="Front Loss")
+#     ax.legend()
 
-    time_values = []
-    avg_loss_values = []
-    front_loss_values = []
+#     time_values = []
+#     avg_loss_values = []
+#     front_loss_values = []
 
-    while run:
-        try:
-            elapsed_time = (pygame.time.get_ticks() - start_time) / 1000
-            if len(flock) > 0:
-                # Use getattr with default values to avoid AttributeError
-                avg_loss = math.sqrt(sum(getattr(boid, 'loss', 0)**2 for boid in flock) / len(flock))
-                avg_front_loss = math.sqrt(sum(getattr(boid, 'front_loss', 0)**2 for boid in flock) / len(flock))
-            else:
-                avg_loss = 0
-                avg_front_loss = 0
+#     while run:
+#         try:
+#             elapsed_time = (pygame.time.get_ticks() - start_time) / 1000
+#             if len(flock) > 0:
+#                 # Use getattr with default values to avoid AttributeError
+#                 avg_loss = math.sqrt(sum(getattr(boid, 'loss', 0)**2 for boid in flock) / len(flock))
+#                 avg_front_loss = math.sqrt(sum(getattr(boid, 'front_loss', 0)**2 for boid in flock) / len(flock))
+#             else:
+#                 avg_loss = 0
+#                 avg_front_loss = 0
 
-            time_values.append(elapsed_time)
-            avg_loss_values.append(avg_loss)
-            front_loss_values.append(avg_front_loss)
+#             time_values.append(elapsed_time)
+#             avg_loss_values.append(avg_loss)
+#             front_loss_values.append(avg_front_loss)
 
-            if len(time_values) > 100:
-                time_values = time_values[-100:]
-                avg_loss_values = avg_loss_values[-100:]
-                front_loss_values = front_loss_values[-100:]
+#             if len(time_values) > 100:
+#                 time_values = time_values[-100:]
+#                 avg_loss_values = avg_loss_values[-100:]
+#                 front_loss_values = front_loss_values[-100:]
 
-            avg_line.set_xdata(time_values)
-            avg_line.set_ydata(avg_loss_values)
-            front_line.set_xdata(time_values)
-            front_line.set_ydata(front_loss_values)
-            ax.relim()
-            ax.autoscale_view()
-            plt.draw()
-            plt.pause(0.5)
-        except Exception as e:
-            print(f"Plot thread error: {e}")
-            plt.pause(0.5)
+#             avg_line.set_xdata(time_values)
+#             avg_line.set_ydata(avg_loss_values)
+#             front_line.set_xdata(time_values)
+#             front_line.set_ydata(front_loss_values)
+#             ax.relim()
+#             ax.autoscale_view()
+#             plt.draw()
+#             plt.pause(0.5)
+#         except Exception as e:
+#             print(f"Plot thread error: {e}")
+#             plt.pause(0.5)
 
-    plt.ioff()
-    plt.show()
+#     plt.ioff()
+#     plt.show()
 
-plot_thread = threading.Thread(target=plot_thread)
-plot_thread.start()
+# plot_thread = threading.Thread(target=plot_thread)
+# plot_thread.start()
 
 while run:
     clock.tick(fps)
@@ -110,12 +112,18 @@ while run:
             run = False
         if event.type == pygame.MOUSEBUTTONUP:
             clicked = True
+        # if event.type == pygame.MOUSEBUTTONDOWN:
+        #     x, y = event.pos
+        #     if highway1.on_road((x, y)):
+        #         flock.append(Boid(x, y, highway1))
+        #     if highway2.on_road((x, y)):
+        #         flock.append(Boid(x, y, highway2))
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
             if highway1.on_road((x, y)):
-                flock.append(Boid(x, y, highway1))
+                flock.append(Ambulance(x, y, highway1))
             if highway2.on_road((x, y)):
-                flock.append(Boid(x, y, highway2))
+                flock.append(Ambulance(x, y, highway2))
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 run = False
@@ -134,6 +142,7 @@ while run:
     if reset or resetButton.state:
         flock = [Boid(random.randint(20, Width - 20), random.randint(20, Height - 20), highway1) for _ in range(n)]
         reset = False
+        
 
     for boid in flock:
         boid.toggles = {"separation": toggleSeparation.state, "alignment": toggleAlignment.state, "cohesion": toggleCohesion.state}
@@ -142,7 +151,7 @@ while run:
         boid.limits()
         boid.behaviour(flock)
         boid.update(flock, obstacles)
-        boid.hue += speed
+        # boid.hue += speed
         boid.Draw(window, Distance, scale)
 
     if showUI:

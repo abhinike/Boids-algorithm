@@ -1,4 +1,5 @@
 import pygame
+from boid import Boid
 from highway import Highway
 from tools import *
 from random import uniform
@@ -12,7 +13,7 @@ import math
 # def hsvToRGB(h, s, v):
 #     return tuple(round(i * 255) for i in colorsys.hsv_to_rgb(h, s, v))
 
-class Boid:
+class Ambulance(Boid):
     def __init__(self, x, y, highway: Highway):
         self.position = Vector(x, y)
         vec_x = uniform(0.5, 1)
@@ -22,13 +23,13 @@ class Boid:
         # Set a random magnitude
         self.velocity = self.velocity * uniform(1.5, 4)
         self.acceleration = Vector()
-        self.color = (255, 255, 255)
+        self.color = (255, 0, 0) # Red color for ambulance
         self.temp = self.color
         self.secondaryColor = (70, 70, 70)
-        self.max_speed = 3
+        self.max_speed = 4
         self.max_length = 1
-        self.size = 2
-        self.stroke = 5
+        self.size = 4
+        self.stroke = 3
         self.angle = 0
         self.hue = 0
         self.toggles = {"separation": True, "alignment": True, "cohesion": True}

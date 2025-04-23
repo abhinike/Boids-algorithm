@@ -96,6 +96,7 @@ class Highway1(Highway):  # Horizontal Highway
         if boid.position.x < 0:
             boid.position.x = self.length
         elif boid.position.x > self.length:
+            # pass 
             boid.position.x = 0
             # boid.position.y = random.randint(0, 400)
 
